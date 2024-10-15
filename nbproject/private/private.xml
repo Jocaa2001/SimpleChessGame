@@ -3,9 +3,12 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
+            <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/model/pieces/BlackKing.java</file>
+            <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/model/player/Player.java</file>
             <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/main/Main.java</file>
-            <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/view/PanelListener.java</file>
-            <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/view/BoardPanel.java</file>
+            <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/model/pieces/WhiteBishop.java</file>
+            <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/model/pieces/BlackPawn.java</file>
+            <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/model/pieces/WhitePawn.java</file>
             <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/view/Board.java</file>
             <file>file:/C:/Users/Win%2010/Documents/NetBeansProjects/SimpleChessGame/src/controller/Controller.java</file>
         </group>
