@@ -6,12 +6,6 @@ package view;
 
 
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Point;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import model.pieces.AbstractPiece;

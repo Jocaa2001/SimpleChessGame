@@ -37,14 +37,15 @@ public class Controller {
     public static int Clicked = 0;
     private static Controller instance;
     public static Board board;
+
+   
     private AbstractPiece promotionPiece;
     private AbstractPiece promotedPawn;
     private PromotionForm pf;
     private Player player1;
     private Player player2;
-    //ArrayList<Coordinates> findPossibleMoves;
-   static AbstractPiece temp;
-
+    static AbstractPiece temp;
+   private boolean checked = false;
     
 
     
@@ -68,11 +69,13 @@ public class Controller {
     }
 
     public void makeMove(AbstractPiece p, int endingX, int endingY) {
-        
-       p.move(p, endingX, endingY);
+        //System.out.println(temp.getPossibleMoves() + "iz makeMOve");
+       temp.move(temp, endingX, endingY);
     }
 
     public void setStartingPosition() {
+        player1.setTurn(true);
+        player2.setTurn(false);
         Clicked = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -115,7 +118,7 @@ public class Controller {
          board.getBoardGrid()[7][4].add(new WhiteKing());
          
          setCoordinates();
-         
+         unhighlight();
          board.repaint();
          board.validate();
     }
@@ -127,13 +130,7 @@ public class Controller {
         
     }
     
-    public boolean isKingChecked(){
-        
-        
-        return false;
-        
-    }
-
+    
     private void setCoordinates() {
         
           for (int i = 0; i < 8; i++) {
@@ -213,65 +210,315 @@ public class Controller {
         return player2;
     }
 
-   
-
-    public void move(BoardPanel square) {
-        int endingX;
-      int endingY;
-       
+    public void handleClick(BoardPanel square) {
+        
+        AbstractPiece p = square.getPiece();
+        //ArrayList<Coordinates> CheckedPossibleMoves = new ArrayList<Coordinates>();
+        //if(p != null) temp = p;
+       //System.out.println(Clicked + "clicked");
+        
+        boolean check = checkForCheck();
+        
+        if(check) checked = true;
+        
+        if(Clicked == 0 && check){
+            System.out.println("uslo");
+            handleCheckedMoves();
+            highlightPossibleMoves(p);
+            temp = p;
+            Clicked = 1;
+            return;
+        }
+        
         
       
-      
-        switch (controller.Controller.Clicked) {
-            case 0:
-                
+        if(Clicked == 1 && checked){
+            
+            move(square);
+            Clicked = 0;
+            checked = false;
+            swapTurns();
+            System.out.println(checkForCheck() + "da li je i dalje u sahu");
+            return;
+        }
+        
+
+        if(p!= null && player1.isTurn() && p.isIsblack() != player1.isWhite() && Clicked == 0){
+            //System.out.println("na " + Clicked + "klik je uslo u prvi");
+            handlePieceSelection(square);
+            
+            return;
+        }
+        
+         else if(player1.isTurn() && Clicked == 1){
+            //System.out.println("na " + Clicked + "klik je uslo u drugi");
+            move(square);
+            swapTurns();
+            return;
+        }
+        
+         else if(p!=null && player2.isTurn() && p.isIsblack() != player2.isWhite() && Clicked == 0){
+             
+              System.out.println(temp);
+            handlePieceSelection(square);
+           
+            
+            return;
+        }
+        
+         else if(player2.isTurn() && Clicked == 1){
+            
+            System.out.println(temp);
+            move(square);
+            swapTurns();
+            return;
+        }
+        
+        
+        board.repaint();
+        
+    }
+
+    private void handlePieceSelection(BoardPanel square) {
+        
+               
+                unhighlight();
                 temp = square.getPiece();
+                temp.setCoordinates(new Coordinates(square.getCoordX(),square.getCoordY()));                
+                findPossibleMoves(temp);
                 
-                if(temp == null){
-                    System.out.println("nema figure na ovom polju");
-                    return;
+                if(!(temp instanceof BlackKing) && !(temp instanceof WhiteKing) && isPinned(temp)){
+                    
+                    pinnedPieceUpdateMoves();
+                  
+                   
+                 
+                  
+                   
                 }
                 
-                
-                temp.setCoordinates(new Coordinates(square.getCoordX(),square.getCoordY()));
-               
-                controller.Controller.getInstance().findPossibleMoves(temp);
-                controller.Controller.getInstance().highlightPossibleMoves(temp);
-                controller.Controller.Clicked = 1;
-                break;
-            case 1:
-                
-                endingX = square.getCoordX();
-                endingY = square.getCoordY();
-                controller.Controller.Clicked = 0;
-                
-              
-                controller.Controller.getInstance().makeMove(temp, endingX,endingY);
-               controller.Controller.getInstance().unhighlight();
-               
-               Player p1 = controller.Controller.getInstance().getPlayer1();
-            Player p2 = controller.Controller.getInstance().getPlayer2();
-            
-          
-            break;
-               
-              
-            default:
-                throw new AssertionError();
-        }
-       
-       endingX = -1;
-       endingY = -1;
+                highlightPossibleMoves(temp);
+                //System.out.println(temp.getPossibleMoves() + "iz handlepieceselection");
+                Clicked = 1;
+        
     }
 
-    public void p1Move(BoardPanel square) {
-        
-              AbstractPiece p = square.getPiece();
-        
+   public void move(BoardPanel square) {
+       
+        int endingX;
+        int endingY;
+        endingX = square.getCoordX();
+        endingY = square.getCoordY();
+        //System.out.println(temp.getPossibleMoves() + "iz prvog moovea");
+        makeMove(temp,endingX,endingY);
+        unhighlight();
+        Clicked = 0;
+        board.repaint();
+        board.revalidate();
+      
+    }
+
+    private void checkGameState(ArrayList<Coordinates> CheckedPossibleMoves) {
+        if(CheckedPossibleMoves.isEmpty()){
+            System.out.println("gameOver sah mat");
+        }
+        //da li je sah mat
+        //da li je pat
     }
     
+    private AbstractPiece returnKingsPosition(){//trazi poziciju trenutnog igraca na tabli
+        
+        Player p = player1.isTurn() ? player1:player2; //
+        
+        for (int i = 0; i < Board.row; i++) {
+            for (int j = 0; j < Board.column; j++) {
+                BoardPanel bg = board.getBoardGrid()[i][j];
+                if(bg.getPiece() != null && p.isWhite() && bg.getPiece().getClass().equals(WhiteKing.class)){//provera vracanja belog kralja
+                    return bg.getPiece();
+                }
+                
+                if(bg.getPiece() != null && !p.isWhite() && bg.getPiece().getClass().equals(BlackKing.class)){//provera vracanja crnog kralja
+                    return bg.getPiece();
+                }
+            }
+        }
+        return null;
+    }
     
+    private AbstractPiece returnOppositeKingsPosition(){
+        Player p = player1.isTurn() ? player2 : player1; // Uzimamo suprotnog igrača
+
+for (int i = 0; i < Board.row; i++) {
+    for (int j = 0; j < Board.column; j++) {
+        BoardPanel bg = board.getBoardGrid()[i][j];
+        if (bg.getPiece() != null && p.isWhite() && bg.getPiece().getClass().equals(WhiteKing.class)) {
+            return bg.getPiece(); // Vraća belog kralja
+        }
+        if (bg.getPiece() != null && !p.isWhite() && bg.getPiece().getClass().equals(BlackKing.class)) {
+            return bg.getPiece(); // Vraća crnog kralja
+        }
+    }
+}
+return null;
+
+    }
    
+    private boolean checkForCheck(){
+        
+        AbstractPiece p = returnKingsPosition();
+        
+        if(player2.isTurn()){
+            BlackKing bk = (BlackKing) p;  
+            return bk.isKingChecked();
+        }
+        
+        else if(player1.isTurn()){
+            WhiteKing wk = (WhiteKing) p;
+            return wk.isKingChecked();
+        }
+        return false;
+    }
+
+    private void handleCheckedMoves() {
+        //ArrayList<Coordinates> allPossibleMoves = new ArrayList<>();
+        Player p = player1.isTurn() ? player1:player2;
+        //AbstractPiece king = returnKingsPosition();
+       // Coordinates kingsOriginalCoordinates = king.getCoordinates();
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                AbstractPiece piece = board.getBoardGrid()[i][j].getPiece();
+               
+                if(piece != null && piece.isIsblack() == !p.isWhite()){
+                     //System.out.println(piece.getClass());
+                     ArrayList<Coordinates> possibleMoves = piece.findPossibleMoves(piece);
+                      ArrayList<Coordinates> possibleMovesUpdated = new ArrayList<>(); 
+                     for (Coordinates move : possibleMoves) {
+                         
+//                         if(piece instanceof BlackKing || piece instanceof WhiteKing){
+//                             king.setCoordinates(new Coordinates(move.getX(), move.getY()));
+//                         }
+                         
+                         //pomeri ga privremeno
+                         //pravimo temp figuru koja ce da vrati prethodnu figuru na mesto ako je to polje postojalo kao moguci potez
+                          AbstractPiece tmp = board.getBoardGrid()[move.getX()][move.getY()].getPiece();
+                         board.getBoardGrid()[i][j].setPiece(null);
+                         board.getBoardGrid()[i][j].removeAll();
+                         board.getBoardGrid()[move.getX()][move.getY()].add(piece);
+                        
+                         boolean stillInCheck = checkForCheck();
+                         
+                         //vrati na originalno mesto
+                         board.getBoardGrid()[move.getX()][move.getY()].removeAll();
+                         board.getBoardGrid()[move.getX()][move.getY()].setPiece(null);
+                         board.getBoardGrid()[i][j].add(piece);
+                         
+                         
+                         //ako je na tom polju postojala protivnicka figura vrati je na mesto
+                         if(tmp != null && tmp.isIsblack() != piece.isIsblack()){
+                             board.getBoardGrid()[move.getX()][move.getY()].add(tmp);
+                            
+                         }
+                         
+                        //king.setCoordinates(kingsOriginalCoordinates);
+
+                         board.repaint();
+                         
+                         if(!stillInCheck ){
+                            possibleMovesUpdated.add(move);
+                           //allPossibleMoves.add(move);
+                         }
+
+                    }
+                    piece.setPossibleMoves(possibleMovesUpdated);
+                }
+            }
+        }
+        
+    }
+
+    public void swapTurns() {
+        player1.setTurn(!player1.isTurn());
+        player2.setTurn(!player2.isTurn());
+    }
+
+    public boolean isPinned(AbstractPiece piece) {
+        board.getBoardGrid()[piece.getCoordinates().getX()][piece.getCoordinates().getY()].removeAll();
+        board.getBoardGrid()[piece.getCoordinates().getX()][piece.getCoordinates().getY()].setPiece(null);
+        boolean check = checkForCheck();
+        board.getBoardGrid()[piece.getCoordinates().getX()][piece.getCoordinates().getY()].add(piece);
+        return check;
+    }
+    
+    //courtesy of chatgpt
+    public AbstractPiece getPinner(AbstractPiece piece) {
+    Coordinates piecePos = piece.getCoordinates();
+    AbstractPiece king = returnKingsPosition();
+
+    // Pronađi pravac između kralja i figure (vertikalno, horizontalno ili dijagonalno)
+    int dx = Integer.signum(king.getCoordinates().getX() - piecePos.getX());
+    int dy = Integer.signum(king.getCoordinates().getY() - piecePos.getY());
+        //System.out.println(dx + " " + dy);
+    System.out.println(piece.getCoordinates());
+    int x = piecePos.getX() - dx;
+    int y = piecePos.getY() - dy;
+    
+    // Prolazi kroz polja između figure i kralja 
+    while (x >= 0 && x <= 7 && y >= 0 && y <= 7) {
+        BoardPanel targetSquare = controller.Controller.board.getBoardGrid()[x][y];
+         //System.out.println(x + " " + y);
+        if (targetSquare.isOcupied()) {
+            
+            AbstractPiece targetPiece = targetSquare.getPiece();
+           
+            
+            // Ako je figura suprotnog tima koja napada kralja i to je top, lovac ili kraljica
+            
+            
+            if (targetPiece.isIsblack() != piece.isIsblack() &&
+                    (targetPiece instanceof BlackRook || targetPiece instanceof BlackBishop || targetPiece instanceof BlackQueen
+                    ||targetPiece instanceof WhiteRook || targetPiece instanceof WhiteBishop || targetPiece instanceof WhiteQueen)) {
+                return targetPiece; // Vraća figuru koja pinuje
+            }
+          //  break; // Ako naiđe na prepreku (druga figura), prekini pretragu
+        }
+        x -= dx;
+        y -= dy;
+    }
+    return null; // Nema pinovanja
+}
+
+    private void pinnedPieceUpdateMoves() {
+        AbstractPiece pinner = getPinner(temp);
+        Coordinates originalTempCoords = temp.getCoordinates();
+        ArrayList<Coordinates> pinnerPossibleMoves = pinner.findPossibleMoves(pinner);
+        ArrayList<Coordinates> updatedPossibleMoves = new ArrayList<>();
+        
+        for (Coordinates coord : temp.getPossibleMoves()) {
+            if(pinnerPossibleMoves.contains(coord)){
+                //pomeri temp i vidi da li ostaje u sahu
+                 AbstractPiece tmp = board.getBoardGrid()[coord.getX()][coord.getY()].getPiece();
+                         board.getBoardGrid()[originalTempCoords.getX()][originalTempCoords.getY()].setPiece(null);
+                         board.getBoardGrid()[originalTempCoords.getX()][originalTempCoords.getY()].removeAll();
+                         board.getBoardGrid()[coord.getX()][coord.getY()].add(temp);
+                        
+                         boolean stillInCheck = checkForCheck();
+                         
+                         
+                         //vrati na originalno mesto
+                         board.getBoardGrid()[coord.getX()][coord.getY()].removeAll();
+                         board.getBoardGrid()[coord.getX()][coord.getY()].setPiece(null);
+                         board.getBoardGrid()[originalTempCoords.getX()][originalTempCoords.getY()].add(temp);
+                         if(tmp != null && tmp.isIsblack() != temp.isIsblack()){
+                             updatedPossibleMoves.add(coord);
+                            
+                         }
+                         if(!stillInCheck) updatedPossibleMoves.add(coord);
+            }
+        }
+       
+        temp.setPossibleMoves(updatedPossibleMoves);
+         //System.out.println(temp.getPossibleMoves());
+    }
     
     
 }

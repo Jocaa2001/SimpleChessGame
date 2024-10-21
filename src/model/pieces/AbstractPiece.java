@@ -71,7 +71,9 @@ public abstract class AbstractPiece extends JComponent {
         }else{
             System.out.println("potez nije moguc");
             Controller.brojPoteza--;
-           
+            Controller.getInstance().swapTurns();
+            return;
+            
         }
         
        
@@ -113,5 +115,8 @@ public abstract class AbstractPiece extends JComponent {
     public ArrayList<Coordinates> getPossibleMoves() {
         return possibleMoves;
     }
-    
+
+    public void setPossibleMoves(ArrayList<Coordinates> possibleMoves) {
+        this.possibleMoves = possibleMoves;
+    }    
 }

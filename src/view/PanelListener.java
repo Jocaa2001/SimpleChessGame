@@ -35,36 +35,9 @@ public class PanelListener implements MouseListener {
     @Override
     public void mouseClicked(MouseEvent e) {
       //System.out.println("clicked" + square.getCoordX() + " " + square.getCoordY());
-      Player p1 =controller.Controller.getInstance().getPlayer1();
-      Player p2 =controller.Controller.getInstance().getPlayer2();
-      AbstractPiece p = square.getPiece();
-      
-        if(p!= null && p1.isTurn() && p.isIsblack() != p1.isWhite()){
-            System.out.println("potez igraca 1");
-            move();
-            return;
-        }
-        
-        if(p1.isTurn() && Controller.Clicked == 1){
-            move();
-            p1.setTurn(false);
-            p2.setTurn(true);
-            return;
-        }
-        
-        if(p!=null && p2.isTurn() && p.isIsblack() != p2.isWhite()){
-            System.out.println("potez igraca 2");
-            move();
-            return;
-        }
-        
-        if(p2.isTurn() && Controller.Clicked == 1){
-            move();
-            p1.setTurn(true);
-            p2.setTurn(false);
-            return;
-        }
-             controller.Controller.getInstance().p1Move(square);
+     
+     controller.Controller.getInstance().handleClick(square);
+             
     }
     @Override
     public void mousePressed(MouseEvent e) {
@@ -97,8 +70,5 @@ public class PanelListener implements MouseListener {
         this.square = square;
     }
 
-    private void move() {
-        controller.Controller.getInstance().move(square);
-    }
     
 }

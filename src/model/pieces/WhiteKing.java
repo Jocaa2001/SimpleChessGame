@@ -4,6 +4,7 @@
  */
 package model.pieces;
 
+import controller.Controller;
 import java.util.ArrayList;
 import view.BoardPanel;
 
@@ -14,6 +15,8 @@ import view.BoardPanel;
 public class WhiteKing extends AbstractPiece {
 
     private int numberOfMoves = 0;
+    private boolean checked;
+    
     
     public WhiteKing() {
         super("/wk.png");
@@ -140,5 +143,33 @@ public class WhiteKing extends AbstractPiece {
          
         return possibleOpponentMoves;
     }
+
+    public boolean isChecked() {
+        return checked;
+    }
+    
+     public boolean isKingChecked(){
+        
+        //ides kroz svaku protivnicku figuru i proveravas da li njeni moguci potezi sadrze koordinate crnog kralja.
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                BoardPanel bp = Controller.board.getBoardGrid()[i][j];
+                if(bp.getPiece() instanceof WhiteKing || bp.getPiece() instanceof BlackKing) {
+                    continue; // Preskoči kralja
+                }
+                //System.out.println(bp.getPiece().getPossibleMoves() + "iz klase beli kralj");
+                if(bp.getPiece() != null && bp.getPiece().isIsblack() && bp.getPiece().findPossibleMoves(bp.getPiece()).contains(this.coordinates)){
+                    checked = true;
+                   return true;
+            }
+        }
+        
+        
+        
+    }
+        checked = false;
+   return false;
+}
+    
     
 }

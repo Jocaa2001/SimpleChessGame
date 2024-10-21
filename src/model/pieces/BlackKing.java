@@ -134,7 +134,9 @@ public class BlackKing extends AbstractPiece {
     }
 
     public boolean isChecked() {
+        
         return checked;
+        
     }
 
     public void setChecked(boolean checked) {
@@ -172,6 +174,26 @@ public class BlackKing extends AbstractPiece {
          
     }
 
-    
-   
+  public boolean isKingChecked(){
+        
+        //ides kroz svaku protivnicku figuru i proveravas da li njeni moguci potezi sadrze koordinate crnog kralja.
+        for (int i = 0; i < 8; i++) {
+            for (int j = 0; j < 8; j++) {
+                BoardPanel bp = Controller.board.getBoardGrid()[i][j];
+                if(bp.getPiece() instanceof WhiteKing || bp.getPiece() instanceof BlackKing) {
+                    continue; // Preskoči kralja
+                }
+                //System.out.println(bp.getPiece().getPossibleMoves() + "iz klase beli kralj");
+                if(bp.getPiece() != null && !bp.getPiece().isIsblack() && bp.getPiece().findPossibleMoves(bp.getPiece()).contains(this.coordinates)){
+                    
+                   return true;
+            }
+        }
+        
+        
+        
+    }
+        
+   return false;
+}
 }

@@ -35,12 +35,15 @@ public class BlackPawn extends AbstractPiece {
     
     @Override
     public ArrayList<Coordinates> findPossibleMoves(AbstractPiece piece) {
+       ArrayList<Coordinates> pm = new ArrayList<Coordinates>();
+        
+        
          if(piece.getCoordinates().getX() == 7){
                  
                  return null;
            }
         
-            ArrayList<Coordinates> pm = new ArrayList<Coordinates>();
+            
            BoardPanel [][] BoardGrid = controller.Controller.getInstance().board.getBoardGrid();
             
             
@@ -89,6 +92,7 @@ public class BlackPawn extends AbstractPiece {
                pm.add(new Coordinates(piece.getCoordinates().getX()+1, piece.getCoordinates().getY()+1));
            
            }
+           
            
            
             //System.out.println(pm);
