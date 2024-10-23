@@ -76,8 +76,9 @@ public class WhiteKing extends AbstractPiece {
     private boolean checkForShortCastle() {
             if(controller.Controller.getInstance().board.getBoardGrid()[7][7].getPiece()!=null){
           WhiteRook wr = (WhiteRook) controller.Controller.getInstance().board.getBoardGrid()[7][7].getPiece();
-        
-        return (wr.getNumberOfMoves() == 0 && this.numberOfMoves == 0 && !(controller.Controller.getInstance().board.getBoardGrid()[7][6].isOcupied())
+                System.out.println(numberOfMoves == 0 && wr.getNumberOfMoves() == 0 && !(controller.Controller.getInstance().board.getBoardGrid()[7][6].isOcupied())
+                && !(controller.Controller.getInstance().board.getBoardGrid()[7][5].isOcupied()));
+        return (numberOfMoves == 0 && wr.getNumberOfMoves() == 0 && !(controller.Controller.getInstance().board.getBoardGrid()[7][6].isOcupied())
                 && !(controller.Controller.getInstance().board.getBoardGrid()[7][5].isOcupied()));
             }
             return false;
@@ -97,7 +98,7 @@ public class WhiteKing extends AbstractPiece {
         super.move(piece, toX, toY);
         
         //shortCastle
-        if(toX == 7 && toY == 6){
+        if(checkForShortCastle() && toX == 7 && toY == 6){
              WhiteRook wr = (WhiteRook) controller.Controller.getInstance().board.getBoardGrid()[7][7].getPiece();
               controller.Controller.getInstance().board.getBoardGrid()[7][5].add(wr);
             
@@ -106,7 +107,7 @@ public class WhiteKing extends AbstractPiece {
         }
         
         //longCastle
-        if(toX == 7 && toY == 2){
+        if(checkForLongCastle() && toX == 7 && toY == 2){
              WhiteRook wr = (WhiteRook) controller.Controller.getInstance().board.getBoardGrid()[7][0].getPiece();
               controller.Controller.getInstance().board.getBoardGrid()[7][3].add(wr);
             
@@ -131,6 +132,11 @@ public class WhiteKing extends AbstractPiece {
                      if(p instanceof WhiteKing || p instanceof BlackKing) {
                     continue; // Preskoči kralja
                 }
+                     if(p instanceof BlackPawn){
+                         possibleOpponentMoves.addAll(((BlackPawn) p).returnThreatSquares());
+                         continue;
+                     }
+                     
                      ArrayList<Coordinates> pos = p.findPossibleMoves(p);
                      possibleOpponentMoves.addAll(pos);
                      

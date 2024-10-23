@@ -25,6 +25,7 @@ import model.pieces.WhiteRook;
 import model.player.Player;
 import view.Board;
 import view.BoardPanel;
+import view.GameOverForm;
 import view.PanelListener;
 import view.PromotionForm;
 
@@ -37,7 +38,7 @@ public class Controller {
     public static int Clicked = 0;
     private static Controller instance;
     public static Board board;
-
+    private ArrayList<Coordinates> checkedPossibleMoves = null;
    
     private AbstractPiece promotionPiece;
     private AbstractPiece promotedPawn;
@@ -76,6 +77,8 @@ public class Controller {
     public void setStartingPosition() {
         player1.setTurn(true);
         player2.setTurn(false);
+        checked = false;
+        checkedPossibleMoves = null;
         Clicked = 0;
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
@@ -132,7 +135,7 @@ public class Controller {
     
     
     private void setCoordinates() {
-        
+        //na pocetku partije
           for (int i = 0; i < 8; i++) {
              for (int j = 0; j < 8; j++) {
                  if(board.getBoardGrid()[i][j].getPiece() != null){
@@ -145,6 +148,7 @@ public class Controller {
     }
 
     public void highlightPossibleMoves(AbstractPiece temp) {
+        if(temp == null) return;
         Border blackBorder = BorderFactory.createLineBorder(Color.BLACK, 1);
         for (Coordinates coord : temp.getPossibleMoves()) {
            board.getBoardGrid()[coord.getX()][coord.getY()].setOpaque(true);
@@ -213,66 +217,69 @@ public class Controller {
     public void handleClick(BoardPanel square) {
         
         AbstractPiece p = square.getPiece();
-        //ArrayList<Coordinates> CheckedPossibleMoves = new ArrayList<Coordinates>();
-        //if(p != null) temp = p;
-       //System.out.println(Clicked + "clicked");
+       
+        
+       
         
         boolean check = checkForCheck();
         
         if(check) checked = true;
         
         if(Clicked == 0 && check){
-            System.out.println("uslo");
-            handleCheckedMoves();
+            checkedPossibleMoves = handleCheckedMoves();
             highlightPossibleMoves(p);
             temp = p;
             Clicked = 1;
+            if(checkForCheckmate()){
+            new GameOverForm(board, player1.isTurn() ? player2:player1);
+            
+        }
             return;
         }
         
         
+       
+       
+       if(CheckForStalemate()){
+           new GameOverForm(board, null);
+           return;
+       }
+       
       
         if(Clicked == 1 && checked){
-            
             move(square);
-            Clicked = 0;
-            checked = false;
+            Clicked = 0; 
             swapTurns();
-            System.out.println(checkForCheck() + "da li je i dalje u sahu");
+            if (!checkForCheckmate()) {
+            checked = false;
+            }
+           
             return;
         }
         
 
         if(p!= null && player1.isTurn() && p.isIsblack() != player1.isWhite() && Clicked == 0){
-            //System.out.println("na " + Clicked + "klik je uslo u prvi");
             handlePieceSelection(square);
-            
             return;
         }
         
          else if(player1.isTurn() && Clicked == 1){
-            //System.out.println("na " + Clicked + "klik je uslo u drugi");
             move(square);
             swapTurns();
             return;
         }
         
-         else if(p!=null && player2.isTurn() && p.isIsblack() != player2.isWhite() && Clicked == 0){
-             
-              System.out.println(temp);
+         else if(p!=null && player2.isTurn() && p.isIsblack() != player2.isWhite() && Clicked == 0){   
             handlePieceSelection(square);
-           
-            
             return;
         }
         
          else if(player2.isTurn() && Clicked == 1){
-            
-            System.out.println(temp);
             move(square);
             swapTurns();
             return;
         }
+        
         
         
         board.repaint();
@@ -288,13 +295,7 @@ public class Controller {
                 findPossibleMoves(temp);
                 
                 if(!(temp instanceof BlackKing) && !(temp instanceof WhiteKing) && isPinned(temp)){
-                    
                     pinnedPieceUpdateMoves();
-                  
-                   
-                 
-                  
-                   
                 }
                 
                 highlightPossibleMoves(temp);
@@ -315,20 +316,14 @@ public class Controller {
         Clicked = 0;
         board.repaint();
         board.revalidate();
+         
       
     }
 
-    private void checkGameState(ArrayList<Coordinates> CheckedPossibleMoves) {
-        if(CheckedPossibleMoves.isEmpty()){
-            System.out.println("gameOver sah mat");
-        }
-        //da li je sah mat
-        //da li je pat
-    }
     
     private AbstractPiece returnKingsPosition(){//trazi poziciju trenutnog igraca na tabli
         
-        Player p = player1.isTurn() ? player1:player2; //
+        Player p = player1.isTurn() ? player1:player2; //ako je igrac 1 na potezu trazi belog ako je igrac 2 trazi crnog
         
         for (int i = 0; i < Board.row; i++) {
             for (int j = 0; j < Board.column; j++) {
@@ -379,11 +374,11 @@ return null;
         return false;
     }
 
-    private void handleCheckedMoves() {
-        //ArrayList<Coordinates> allPossibleMoves = new ArrayList<>();
+    private ArrayList<Coordinates> handleCheckedMoves() {
+        ArrayList<Coordinates> allPossibleMoves = new ArrayList<>();
         Player p = player1.isTurn() ? player1:player2;
-        //AbstractPiece king = returnKingsPosition();
-       // Coordinates kingsOriginalCoordinates = king.getCoordinates();
+        AbstractPiece king = returnKingsPosition();
+        Coordinates kingsOriginalCoordinates = king.getCoordinates();
         for (int i = 0; i < 8; i++) {
             for (int j = 0; j < 8; j++) {
                 AbstractPiece piece = board.getBoardGrid()[i][j].getPiece();
@@ -394,9 +389,9 @@ return null;
                       ArrayList<Coordinates> possibleMovesUpdated = new ArrayList<>(); 
                      for (Coordinates move : possibleMoves) {
                          
-//                         if(piece instanceof BlackKing || piece instanceof WhiteKing){
-//                             king.setCoordinates(new Coordinates(move.getX(), move.getY()));
-//                         }
+                         if(piece instanceof BlackKing || piece instanceof WhiteKing){
+                             king.setCoordinates(new Coordinates(move.getX(), move.getY()));
+                         }
                          
                          //pomeri ga privremeno
                          //pravimo temp figuru koja ce da vrati prethodnu figuru na mesto ako je to polje postojalo kao moguci potez
@@ -419,20 +414,23 @@ return null;
                             
                          }
                          
-                        //king.setCoordinates(kingsOriginalCoordinates);
+                        king.setCoordinates(kingsOriginalCoordinates);
 
                          board.repaint();
                          
                          if(!stillInCheck ){
                             possibleMovesUpdated.add(move);
-                           //allPossibleMoves.add(move);
+                            allPossibleMoves.add(move);
                          }
 
                     }
                     piece.setPossibleMoves(possibleMovesUpdated);
+                    
                 }
             }
+            
         }
+        return allPossibleMoves;
         
     }
 
@@ -520,5 +518,39 @@ return null;
          //System.out.println(temp.getPossibleMoves());
     }
     
-    
+    public boolean checkForCheckmate(){
+        return checked && checkedPossibleMoves != null && checkedPossibleMoves.isEmpty();
+    }
+
+    private boolean CheckForStalemate() {
+        return !checked && !isAnyMovePossible();
+    }
+
+    private boolean isAnyMovePossible() {
+        //prolazi se kroz sve figure trenutnog igraca i gleda se da li makar jedna ima moguc potez
+         BoardPanel[][] boardGrid = controller.Controller.board.getBoardGrid();
+         Player player = player1.isTurn() ? player1:player2;
+           
+         for (int i = 0; i < 8; i++) {
+             for (int j = 0; j < 8; j++) {
+                 if(boardGrid[i][j].getPiece() != null && boardGrid[i][j].getPiece().isIsblack() != player.isWhite()){
+                     AbstractPiece p = boardGrid[i][j].getPiece();
+                     if(!p.findPossibleMoves(p).isEmpty()){
+                         return true;
+                     }
+                 }
+             }
+        }
+         return false;
+    }
+
+    public void setPlayerNames(String player1Name, String player2Name) {
+        player1.setName(player1Name);
+        player2.setName(player2Name);
+        board.addInfoField();
+        board.repaint();
+        board.revalidate();
+        
+    }
+
 }

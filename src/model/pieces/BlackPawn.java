@@ -171,6 +171,15 @@ public class BlackPawn extends AbstractPiece {
         return false;
     }
    
-    
+    public ArrayList<Coordinates> returnThreatSquares(){
+        ArrayList<Coordinates> threatSquares = new ArrayList<>();
+        if(getCoordinates().getY() != 7){ // ubaci desnu koordinatu
+            threatSquares.add(new Coordinates(getCoordinates().getX() +1, getCoordinates().getY()+1));
+        }
+        if(getCoordinates().getY() != 0){ //ubaci levu koordinatu
+            threatSquares.add(new Coordinates(getCoordinates().getX() +1, getCoordinates().getY()-1));
+        }
+        return threatSquares;
+    }
       
 }

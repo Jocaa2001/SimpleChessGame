@@ -29,7 +29,10 @@ import model.pieces.BlackRook;
 import model.pieces.WhitePawn;
 import model.pieces.WhiteQueen;
 import view.Board;
+import view.GameOverForm;
+import view.NameInputDialog;
 import view.PromotionForm;
+
 
 
 /**
@@ -42,11 +45,14 @@ public class Main {
      Board b = new Board();
      controller.Controller.getInstance().setBoard(b);
      controller.Controller.getInstance().setStartingPosition();
-
-     //new PromotionForm(false);
-     
-     
     b.setVisible(true);
+    
+    
+    NameInputDialog nid = new NameInputDialog(b);
+    nid.setVisible(true);
+
+        
+    
     }
     
     

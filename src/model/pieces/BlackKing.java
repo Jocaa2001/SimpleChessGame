@@ -84,11 +84,13 @@ public class BlackKing extends AbstractPiece {
     }
 
     private boolean checkForShortCastle() {
+         if(controller.Controller.getInstance().board.getBoardGrid()[7][7].getPiece()!=null){
         BlackRook br = (BlackRook) controller.Controller.getInstance().board.getBoardGrid()[0][7].getPiece();
         
-        return (br.getNumberOfMoves() == 0 && this.numberOfMoves == 0 && !(controller.Controller.getInstance().board.getBoardGrid()[0][6].isOcupied())
+        return (numberOfMoves == 0 && br.getNumberOfMoves() == 0 && !(controller.Controller.getInstance().board.getBoardGrid()[0][6].isOcupied())
                 && !(controller.Controller.getInstance().board.getBoardGrid()[0][5].isOcupied()));
-        
+         }
+         return false;
     }
 
     
@@ -98,7 +100,7 @@ public class BlackKing extends AbstractPiece {
         super.move(piece, toX, toY);
         
         //shortCastle
-        if(toX == 0 && toY == 6){
+        if(checkForShortCastle() && toX == 0 && toY == 6){
              BlackRook br = (BlackRook) Controller.board.getBoardGrid()[0][7].getPiece();
               Controller.board.getBoardGrid()[0][5].add(br);
             
@@ -107,7 +109,7 @@ public class BlackKing extends AbstractPiece {
         }
         
         //longCastle
-        if(toX == 0 && toY == 2){
+        if(checkForLongCastle() && toX == 0 && toY == 2){
              BlackRook br = (BlackRook) Controller.board.getBoardGrid()[0][7].getPiece();
               Controller.board.getBoardGrid()[0][3].add(br);
             
@@ -160,6 +162,11 @@ public class BlackKing extends AbstractPiece {
                      if(p instanceof WhiteKing || p instanceof BlackKing) {
                     continue; // Preskoči kralja
                 }
+                     if(p instanceof WhitePawn){
+                         possibleOpponentMoves.addAll(((WhitePawn) p).returnThreatSquares());
+                         //System.out.println(possibleOpponentMoves);
+                         continue;
+                     }
                      ArrayList<Coordinates> pos = p.findPossibleMoves(p);
                      possibleOpponentMoves.addAll(pos);
                      
